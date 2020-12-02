@@ -1,8 +1,11 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import Layout from '../components/default-layout'
+import utilStyles from '../styles/blog.module.css'
 
-export default function Home() {
+import { getSortedPostsData } from '../lib/posts'
+
+export default function Home({name, allPostsData}) {
   return (
     <Layout>
     <div className="container">
@@ -13,7 +16,7 @@ export default function Home() {
 
       <main>
         <h1 className="title">
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          Welcome {name} to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
         <p className="description">
@@ -27,6 +30,21 @@ export default function Home() {
             <a>First Post</a>
           </Link>
         </p>
+
+        <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
+          <h2 className={utilStyles.headingLg}>Blog</h2>
+          <ul className={utilStyles.list}>
+            {allPostsData.map(({ id, date, title }) => (
+              <li className={utilStyles.listItem} key={id}>
+                {title}
+                <br />
+                {id}
+                <br />
+                {date}
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <div className="grid">
           <a href="https://nextjs.org/docs" className="card">
@@ -219,3 +237,39 @@ export default function Home() {
     </Layout>
   )
 }
+
+// https://nextjs.org/docs/basic-features/data-fetching#getstaticprops-static-generation
+export async function getStaticProps(context) {
+  const id = context.params.id
+
+  // if (!data) {
+  //   return {
+  //     notFound: true,
+  //   }
+  // }
+
+  // if (!data) {
+  //   return {
+  //     redirect: {
+  //       destination: '/',
+  //       permanent: false,
+  //     },
+  //   }
+  // }
+  // Get external data from the file system, API, DB, etc.
+  // const data = ...
+  const allPostsData = getSortedPostsData()
+  // The value of the `props` key will be
+  //  passed to the `Home` component
+  return {
+    props: {
+      id: id,
+      name: 'James',
+      allPostsData
+    },
+    revalidate: 30, // In seconds - to invalidate cache
+    fallback: true
+  }
+}
+
+// for client side only fetching: https://swr.vercel.app/
